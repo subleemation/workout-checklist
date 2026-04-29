@@ -12,7 +12,8 @@ datasource db {
 model WorkoutSession {
   id        Int        @id @default(autoincrement())
   date      DateTime   @default(now())
-  bodyPart  String     // shoulder, chest, back, legs, arms
+  phase     String     // "primary" or "secondary"
+  day       Int        // 1~7
   notes     String?
   exercises Exercise[]
 }
@@ -29,38 +30,19 @@ model Exercise {
 
 // 세트별 기록
 model Set {
-  id           Int      @id @default(autoincrement())
-  setNumber    Int
-  weight       Float
-  reps         Int
-  rir          Int?     // Reps In Reserve (선택)
-  stimulation  Int?     // 자극 점수 1~10
-  pump         Int?     // 펌핑 점수 1~10
-  exercise     Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-  exerciseId   Int
+  id         Int      @id @default(autoincrement())
+  setNumber  Int
+  weight     Float
+  reps       Int
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  exerciseId Int
 }
 
-// 식단 + 보충제 타이밍
-model DietLog {
-  id              Int      @id @default(autoincrement())
-  date            DateTime @unique @default(now())
-  breakfastCarbs  Int      @default(1) // 0~2
-  lunchCarbs      Int      @default(1) // 0~2
-  dinnerCarbs     Int      @default(1) // 0~2
-  workoutTime     String?  // "17:00"
-  beetTime        String?  // 비트 섭취 시간 "14:00"
-  arginineTime    String?  // 아르기닌 섭취 시간 "16:30"
-  caffeineTime    String?  // 카페인 섭취 시간 "16:30"
-  notes           String?
-}
-
-// 컨디션 / 상태 기록
+// 상태 기록
 model ConditionLog {
-  id          Int      @id @default(autoincrement())
-  date        DateTime @unique @default(now())
-  weight      Float?   // kg
-  sleepHours  Float?   // 수면 시간
-  fatigue     Int?     // 피로도 1~10
-  condition   Int?     // 컨디션 1~10
-  notes       String?
+  id           Int      @id @default(autoincrement())
+  date         DateTime @unique @default(now())
+  weight       Float    // kg
+  skeletalMass Float    // 골격근량 kg
+  bodyFat      Float    // 체지방률 %
 }

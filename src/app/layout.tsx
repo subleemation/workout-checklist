@@ -25,8 +25,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full bg-gray-950 text-gray-100">
         <nav className="bg-gray-900 border-b border-gray-800 px-4 py-3 flex gap-6 text-sm font-medium sticky top-0 z-10">
           <a href="/" className="text-blue-400 hover:text-blue-300">🏠 홈</a>
-          <a href="/workout" className="text-gray-300 hover:text-white">💪 운동</a>
-          <a href="/diet" className="text-gray-300 hover:text-white">🥗 식단</a>
+          <a href="/workout-primary" className="text-gray-300 hover:text-white">💪 1차 운동</a>
+          <a href="/workout-secondary" className="text-gray-300 hover:text-white">💪 2차 운동</a>
+          <a href="/condition" className="text-gray-300 hover:text-white">⚖️ 상태</a>
           <a href="/analysis" className="text-gray-300 hover:text-white">📊 분석</a>
         </nav>
         <main className="max-w-3xl mx-auto px-4 py-6">

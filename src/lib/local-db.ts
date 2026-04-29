@@ -5,9 +5,6 @@ export interface ExerciseSet {
   setNumber: number
   weight: number
   reps: number
-  rir: number | null
-  stimulation: number | null
-  pump: number | null
 }
 
 export interface Exercise {
@@ -20,32 +17,18 @@ export interface Exercise {
 export interface WorkoutSession {
   id?: number
   date: string
-  bodyPart: string
+  phase: 'primary' | 'secondary'
+  day: number
   notes: string | null
   exercises: Exercise[]
-}
-
-export interface DietLog {
-  id?: number
-  date: string
-  breakfastCarbs: number
-  lunchCarbs: number
-  dinnerCarbs: number
-  workoutTime: string | null
-  beetTime: string | null
-  arginineTime: string | null
-  caffeineTime: string | null
-  notes: string | null
 }
 
 export interface ConditionLog {
   id?: number
   date: string
-  weight: number | null
-  sleepHours: number | null
-  fatigue: number | null
-  condition: number | null
-  notes: string | null
+  weight: number
+  skeletalMass: number
+  bodyFat: number
 }
 
 const DB_NAME = 'coach-app'
@@ -60,10 +43,6 @@ function getDB(): Promise<IDBPDatabase> {
         if (!db.objectStoreNames.contains('workoutSessions')) {
           const ws = db.createObjectStore('workoutSessions', { keyPath: 'id', autoIncrement: true })
           ws.createIndex('date', 'date')
-        }
-        if (!db.objectStoreNames.contains('dietLogs')) {
-          const dl = db.createObjectStore('dietLogs', { keyPath: 'id', autoIncrement: true })
-          dl.createIndex('date', 'date')
         }
         if (!db.objectStoreNames.contains('conditionLogs')) {
           const cl = db.createObjectStore('conditionLogs', { keyPath: 'id', autoIncrement: true })
@@ -120,37 +99,6 @@ export async function getSessionsInRange(start: Date, end: Date): Promise<Workou
   return all.sort((a, b) => a.date.localeCompare(b.date))
 }
 
-// ── Diet Logs ─────────────────────────────────────────────────────────────────
-
-export async function saveDietLog(data: Omit<DietLog, 'id' | 'date'>): Promise<void> {
-  const db = await getDB()
-  const today = todayStr()
-  const existing = await getTodayDiet()
-  if (existing?.id != null) {
-    await db.put('dietLogs', { ...existing, ...data })
-  } else {
-    await db.add('dietLogs', { ...data, date: today })
-  }
-}
-
-export async function getTodayDiet(): Promise<DietLog | null> {
-  const db = await getDB()
-  const all = (await db.getAllFromIndex('dietLogs', 'date', todayStr())) as DietLog[]
-  return all[0] ?? null
-}
-
-export async function getRecentDietLogs(limit = 7): Promise<DietLog[]> {
-  const db = await getDB()
-  const all = (await db.getAllFromIndex('dietLogs', 'date')) as DietLog[]
-  return all.reverse().slice(0, limit)
-}
-
-export async function getDietLogsInRange(start: Date, end: Date): Promise<DietLog[]> {
-  const db = await getDB()
-  const range = IDBKeyRange.bound(toDateStr(start), toDateStr(end))
-  const all = (await db.getAllFromIndex('dietLogs', 'date', range)) as DietLog[]
-  return all.sort((a, b) => a.date.localeCompare(b.date))
-}
 
 // ── Condition Logs ────────────────────────────────────────────────────────────
 
@@ -158,8 +106,8 @@ export async function saveConditionLog(data: Omit<ConditionLog, 'id' | 'date'>):
   const db = await getDB()
   const today = todayStr()
   const existing = await getTodayCondition()
-  if (existing?.id != null) {
-    await db.put('conditionLogs', { ...existing, ...data })
+  if (existing?.id) {
+    await db.put('conditionLogs', { id: existing.id, ...data, date: today })
   } else {
     await db.add('conditionLogs', { ...data, date: today })
   }
